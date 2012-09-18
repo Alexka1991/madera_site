@@ -88,4 +88,4 @@ class Ask01(CommonForm):
 
     def save(self):
         message = "\n".join("%s: %s" % (f.label, self.cleaned_data[name]) for name, f in self.base_fields.items())
-        send_mail(u"Опрос", message, 'ask@uralsocionics.ru', ['glader@glader.ru', 'madera@socion.org'])
+        send_mail(u"Опрос", message, None, ['glader@glader.ru', 'madera@socion.org'])

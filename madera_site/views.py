@@ -133,7 +133,7 @@ def order(request):
         if context['form'].is_valid():
             message = EmailMessage(u"Заказ",
                                    context['form'].cleaned_data['contacts'] + "\n\n" + context['form'].cleaned_data['order'],
-                                   'order@uralsocionics.ru',
+                                   None,
                                    ['madera@socion.org'])
             message.send()
             context['error'] = u"Ваш заказ принят"

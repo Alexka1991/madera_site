@@ -7,7 +7,8 @@ from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render_to_response as _render_to_response
+from django.template.loader import Template
 from django.template import RequestContext, Context, loader
 from django.core.mail import send_mail, EmailMessage
 from tagging.models import Tag, TaggedItem
@@ -18,12 +19,19 @@ from .forms import *
 
 
 def render_to_response(request, template_name, context_dict=None):
-    from django.shortcuts import render_to_response as _render_to_response
     if not context_dict:
         context_dict = {}
     context_dict['request'] = request
     context = RequestContext(request, context_dict)
     return _render_to_response(template_name, context_instance=context)
+
+
+def render(request, template, context_dict=None):
+    if not context_dict:
+        context_dict = {}
+    context_dict['request'] = request
+    context = RequestContext(request, context_dict)
+    return Template(template).render(context)
 
 
 def index(request):
@@ -46,8 +54,11 @@ def category(request, category_id):
 
 def article(request, article_id):
     profile = request.user.is_authenticated() and request.user.get_profile() or None
-    context = {'article': get_object_or_404(Article, pk=article_id)
-               }
+    context = {
+        'article': get_object_or_404(Article, pk=article_id),
+    }
+
+    context['article_content'] = render(request, context['article'].content)
 
     if request.user.is_authenticated():
         if request.POST.get('action'):

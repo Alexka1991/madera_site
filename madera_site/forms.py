@@ -14,23 +14,29 @@ class CommonForm(Form):
 
 
 class RegistrationForm(CommonForm):
-    username = CharField(label=u'Логин', help_text=u'Англ буквы и цифры, не менее 3 символов', error_messages={'required': u'Укажите желаемый логин'})
-    password = CharField(required=False, max_length=100)
-    password1 = CharField(max_length=100, widget=PasswordInput, error_messages={'required': u'Введите пароль'})
-    password2 = CharField(max_length=100, widget=PasswordInput, error_messages={'required': u'Введите пароль повторно'})
-    email = EmailField(max_length=100, error_messages={'required': u'Укажите свой email'})
+    name = CharField(label=u'Логин', help_text=u'Англ буквы и цифры, не менее 3 символов', error_messages={'required': u'Укажите желаемый логин'})
+    login = CharField(label=u'Логин', required=False, help_text=u'Поле для отсечения автоматических регистраторов',
+                    widget=TextInput(attrs={'class': 'g-hidden'})
+    )
+    password1 = CharField(label=u"Пароль", max_length=100, widget=PasswordInput, error_messages={'required': u'Введите пароль'})
+    password2 = CharField(label=u"Пароль повторно", max_length=100, widget=PasswordInput, error_messages={'required': u'Введите пароль повторно'})
+    email = EmailField(label=u"Email", max_length=100, error_messages={'required': u'Укажите свой email'})
 
-    def clean_username(self):
-        result = re.search(u'(.{3,})', self.cleaned_data['username'], re.I)
+    def clean_name(self):
+        result = re.search(u'(.{3,})', self.cleaned_data['name'], re.I)
         if result:
-            username = result.group(1)
-            user = User.objects.filter(username=username)
+            name = result.group(1)
+            user = User.objects.filter(username=name)
             if len(user) > 0:
                 raise ValidationError(u'Такой логин уже занят')
 
-            return username
+            return name
         else:
             raise ValidationError(u'Логин должен состоять из англ букв и цифр, не менее 3 символов')
+
+    def clean_login(self):
+        if len(self.cleaned_data['login']) > 0:
+            raise ValidationError(u'Извините, роботов не регистрируем')
 
     def clean_email(self):
         users = User.objects.filter(email=self.cleaned_data['email'])

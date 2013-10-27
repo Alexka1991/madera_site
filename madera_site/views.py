@@ -184,24 +184,24 @@ def send_registration_letter(profile):
     t = loader.get_template('email/registration.html')
     c = Context({'profile': profile})
     subject, content = t.render(c).split("\n", 1)
-    send_mail(subject, content, None, [profile.user.email])
+    send_mail(subject.strip(), content, None, [profile.user.email])
 
 
 def registration(request):
     if request.POST:
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            new_user = User.objects.create_user(form.cleaned_data['username'],
+            new_user = User.objects.create_user(form.cleaned_data['name'],
                                                 form.cleaned_data['email'],
                                                 form.cleaned_data['password'])
             new_user.is_active = True
             new_user.save()
-            user = authenticate(username=form.cleaned_data['username'],
+            user = authenticate(username=form.cleaned_data['name'],
                                 password=form.cleaned_data['password'])
             auth.login(request, user)
 
             profile = Profile(user=new_user,
-                              nick=form.cleaned_data['username'])
+                              nick=form.cleaned_data['name'])
             profile.save()
 
             send_registration_letter(profile)
